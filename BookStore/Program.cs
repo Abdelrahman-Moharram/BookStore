@@ -2,11 +2,13 @@ using BookStore.Data;
 using BookStore.Helpers;
 using BookStore.Models;
 using BookStore.Repository;
+using BookStore.Seeds;
 using BookStore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +56,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
 
 // ------------------------------------------------------- //
 
+// ------------------------- JwtBearer Conf ----------------------//
 
 builder.Services.AddAuthentication(
     options=>
@@ -77,11 +80,45 @@ builder.Services.AddAuthentication(
         };
     });
 
+// ------------------------------------------------------- //
+
+// ------------------------- logger Conf ----------------------//
+
+var logger =
+    new LoggerConfiguration()
+    .ReadFrom
+    .Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Logging.AddSerilog(logger);
+
+
+
 
 
 var app = builder.Build();
 
+// ---------------------------  Data Seeding    ---------------------------- //
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var authService = services.GetRequiredService<IAuthService>();
+var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
+
+try
+{
+    await DefaultRoles.SeedAsync(authService);
+    await DefaultUsers.SeedBasicAsync(authService);
+    await DefaultUsers.SeedAdminAsync(authService, roleManager);
+    await DefaultUsers.SeedSuperAdminAsync(authService, roleManager);
+}
+catch
+{
+    // todo: add to logger
+    throw new Exception("Data Seeding Error occurred");
+}
+
+// ------------------------------------------------------- //
 
 
 // Configure the HTTP request pipeline.
@@ -97,5 +134,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+
+
+
+
 
 app.Run();
