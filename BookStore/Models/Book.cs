@@ -5,7 +5,7 @@
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         public string Name { get; set; }
-        public string File { get; set; }
+        public string? File { get; set; }
         public DateTime PublishDate { get; set; }
 
 
@@ -18,5 +18,8 @@
         
         public string PublisherId { get; set; }
         public virtual ApplicationUser Publisher { get; set; }
+
+        public virtual List<ApplicationUser>? Readers { get; set; }
+        public virtual List<BookReader>? BookReaders { get; set; }
     }
 }

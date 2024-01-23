@@ -1,9 +1,8 @@
 ﻿using BookStore.Constants;
 using BookStore.DTOs.Account;
-using BookStore.Models;
+using BookStore.Helpers;
 using BookStore.Services;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 
 namespace BookStore.Seeds
 {
@@ -13,7 +12,7 @@ namespace BookStore.Seeds
         
 
 
-        public static async Task SeedBasicAsync(IAuthService authService)
+        public static async Task SeedBasicAsync(IAuthService authService, RoleManager<IdentityRole> roleManager)
         {
             var user = await authService.AddUser(new RegisterDTO
             {
@@ -27,7 +26,13 @@ namespace BookStore.Seeds
             {
                 await authService.AddUserToRole(user, Roles.Basic.ToString());
             }
+            foreach (string module in Enum.GetNames(typeof(Modules)))
+            {
+                // get cruds
+                var cruds = RoleModules.instance.cruds(roleName: Roles.Basic.ToString(), Module: module);
 
+                await roleManager.AddModuleCliamsForRole(Roles.Basic.ToString(), module, cruds);
+            }
         }
 
 
@@ -51,9 +56,11 @@ namespace BookStore.Seeds
             }
 
             // Seed Claims
-            foreach (string module in Enum.GetNames(typeof(Modules)))
+            foreach (string module in Enum.GetNames(typeof(Modules)).ToArray())
             {
-                var cruds = Enum.GetNames(typeof(Cruds)).Cast<string>().ToArray();
+                // get cruds
+                var cruds = RoleModules.instance.cruds(roleName: Roles.Admin.ToString(), Module: module);
+
                 await roleManager.AddModuleCliamsForRole(Roles.Admin.ToString(), module, cruds);
             }
         }
@@ -78,7 +85,9 @@ namespace BookStore.Seeds
             // Seed Claims
             foreach (string module in Enum.GetNames( typeof(Modules) ))
             {
-                var cruds = Enum.GetNames(typeof(Cruds)).Cast<string>().ToArray();
+                // get cruds
+                var cruds = RoleModules.instance.cruds(roleName: Roles.SuperAdmin.ToString(), Module: module);
+
                 await roleManager.AddModuleCliamsForRole(Roles.SuperAdmin.ToString(), module, cruds);
             }
 

@@ -1,3 +1,4 @@
+using BookStore.Controllers;
 using BookStore.Data;
 using BookStore.Helpers;
 using BookStore.Models;
@@ -7,6 +8,7 @@ using BookStore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
@@ -103,19 +105,23 @@ using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 var authService = services.GetRequiredService<IAuthService>();
 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+var loggerAccounts = services.GetRequiredService<ILogger<AccountsController>>();
 
 
 try
 {
-    await DefaultRoles.SeedAsync(authService);
-    await DefaultUsers.SeedBasicAsync(authService);
-    await DefaultUsers.SeedAdminAsync(authService, roleManager);
-    await DefaultUsers.SeedSuperAdminAsync(authService, roleManager);
+    if (roleManager.Roles.Any())
+    {
+        await DefaultRoles.SeedAsync(authService);
+        await DefaultUsers.SeedAdminAsync(authService, roleManager);
+        await DefaultUsers.SeedBasicAsync(authService, roleManager);
+        await DefaultUsers.SeedSuperAdminAsync(authService, roleManager);
+    }
 }
-catch
+catch(Exception ex)
 {
     // todo: add to logger
-    throw new Exception("Data Seeding Error occurred");
+    loggerAccounts.LogError(ex, "an Error ocurred while seeding initial data");
 }
 
 // ------------------------------------------------------- //

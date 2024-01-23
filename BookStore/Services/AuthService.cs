@@ -182,6 +182,25 @@ namespace BookStore.Services
             }
             return new BaseResponse { Message = "Invalid user or Role" };
         }
+        public async Task<BaseResponse> RemoveFromRoleAsync(AddToRoleDTO addRole)
+        {
+            ApplicationUser user = await _userManager.FindByIdAsync(addRole.userId);
+
+            IdentityRole role = await _roleManager.FindByNameAsync(addRole.roleName);
+
+            if (user != null && role != null)
+            {
+                if (!await _userManager.IsInRoleAsync(user, addRole.roleName))
+                    return new BaseResponse { Message = $"{user.UserName} is not  assigned to {addRole.roleName} role" };
+
+                var result = await _userManager.RemoveFromRoleAsync(user, addRole.roleName);
+                if (result.Succeeded)
+                {
+                    return new BaseResponse { Message = $"{user.UserName} removed from {addRole.roleName} role Successfully !", isAuthenticated=true };
+                }
+            }
+            return new BaseResponse { Message = "Invalid user or Role" };
+        }
 
 
     }

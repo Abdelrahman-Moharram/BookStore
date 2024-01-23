@@ -11,6 +11,7 @@ namespace BookStore.Services
         Task<ApplicationUser> AddUser(RegisterDTO userDTO);
         Task<BaseResponse> AddUserToRole(ApplicationUser user, string roleName);
         Task<BaseResponse> AddRole(string roleName);
-
+        Task<BaseResponse> AddToRoleAsync(AddToRoleDTO addRole);
+        Task<BaseResponse> RemoveFromRoleAsync(AddToRoleDTO addRole);
     }
 }

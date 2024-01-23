@@ -7,5 +7,7 @@
         public string BookId { get; set; }
         public virtual Book Book { get; set; }
         public DateTime ReadAt { get; set; }
+
+        public decimal Rate { get; set; }
     }
 }
