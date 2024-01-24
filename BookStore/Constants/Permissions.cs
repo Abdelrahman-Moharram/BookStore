@@ -13,5 +13,25 @@
             }
             return permissions;
         }
+        public static List<string> AllCrudsList(string ModuleName)
+        {
+            List<string> Cruds = new ();
+            foreach (string crud in Enum.GetNames (typeof(Cruds)))
+            {
+                Cruds.Add ($"permissions.{crud}.{ModuleName}");
+            }
+            return Cruds;
+        }
+
+        public static List<string> AllPermissionsList()
+        {
+            List<string> Permissions = new List<string>();
+            foreach(string module in Enum.GetNames( typeof( Modules )))
+            {
+                Permissions.AddRange(AllCrudsList(module));
+            }
+            return Permissions;
+        }
+
     }
 }

@@ -18,7 +18,7 @@ namespace BookStore.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDTO register)
+        public async Task<IActionResult> Register([FromBody] RegisterDTO register)
         {
             if (ModelState.IsValid)
             {
@@ -31,7 +31,7 @@ namespace BookStore.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDTO login)
+        public async Task<IActionResult> Login([FromBody] LoginDTO login)
         {
             if (ModelState.IsValid)
             {
@@ -43,32 +43,6 @@ namespace BookStore.Controllers
             return BadRequest(login);
         }
 
-        [Authorize(Roles ="SuperAdmin")]
-        [HttpPost("Roles/Remove")]
-        public async Task<IActionResult> RemoveRole(AddToRoleDTO roleDTO)
-        {
-            if(ModelState.IsValid)
-            {
-                var response = await _authService.RemoveFromRoleAsync(roleDTO);
-                if (response.isAuthenticated)
-                    return Ok(response.Message);
-                return BadRequest(response.Message);
-            }
-            return BadRequest(ModelState);
-        }
-
-        [Authorize(Roles = "SuperAdmin")]
-        [HttpPost("Roles/Add")]
-        public async Task<IActionResult> AddRole(AddToRoleDTO roleDTO)
-        {
-            if (ModelState.IsValid)
-            {
-                var response = await _authService.AddToRoleAsync(roleDTO);
-                if (response.isAuthenticated)
-                    return Ok(response.Message);
-                return BadRequest(response.Message);
-            }
-            return BadRequest(ModelState);
-        }
+        
     }
 }

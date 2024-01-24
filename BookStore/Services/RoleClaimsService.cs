@@ -29,12 +29,10 @@ namespace BookStore.Services
             {
                 if (!AllClaims.Any(c => c.Type == "Permission" && c.Value == permission))
                 {
-                    await _rolesManager.AddClaimAsync(role,
-                        new Claim("Permission", permission));
+                    await _rolesManager.AddClaimAsync(role,new Claim("Permission", permission));
                 }
             }
         }
-
 
     }
 }

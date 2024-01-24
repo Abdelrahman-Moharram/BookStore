@@ -6,6 +6,7 @@ using BookStore.Helpers;
 using BookStore.Models;
 using BookStore.Seeds;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,20 +18,14 @@ namespace BookStore.Services
     public class AuthService : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ILogger<AccountsController> _logger;
         private readonly JWTSettings _jwt;
 
         public AuthService(
             UserManager<ApplicationUser> userManager, 
-            IOptions<JWTSettings> jwt,
-            RoleManager<IdentityRole> roleManager,
-            ILogger<AccountsController> logger
+            IOptions<JWTSettings> jwt
             )
         {
             _userManager = userManager;
-            _roleManager = roleManager;
-            _logger = logger;
             _jwt = jwt.Value;
 
 
@@ -94,35 +89,12 @@ namespace BookStore.Services
             return null;
         }
 
-        public async Task<BaseResponse> AddUserToRole(ApplicationUser user, string roleName)
-        {
-            var result = await _userManager.AddToRoleAsync(user, roleName);
-            if (result.Succeeded)
-            {
-                return new BaseResponse{ Message = "Add To Role Successfully !" };
-            }
-            _logger.LogError("Something went wrong Add User To Role");
-            return new BaseResponse { Message = "Something went wrong !" };
-        }
-        
-        public async Task<BaseResponse> AddRole(string roleName)
-        {
-            if (await _roleManager.FindByNameAsync(roleName) != null)
-                return new BaseResponse { Message = "Role Already Exists" };
-             
-            var result =  await _roleManager.CreateAsync(new IdentityRole(roleName));
-            if (result.Succeeded)
-                return new BaseResponse { Message ="Role Added Successfully !"};
-            _logger.LogError("Something went wrong Add Role");
-            return new BaseResponse { Message = "something went wrong" };
-        }
-        
         public async Task<BaseResponse> Register(RegisterDTO userDTO)
         {
-            if(await _userManager.FindByNameAsync(userDTO.Username) != null) 
-                return new BaseResponse { Message = userDTO.Username + " is already exists !" }; 
-            
-            if(await _userManager.FindByEmailAsync(userDTO.Email) != null) 
+            if (await _userManager.FindByNameAsync(userDTO.Username) != null)
+                return new BaseResponse { Message = userDTO.Username + " is already exists !" };
+
+            if (await _userManager.FindByEmailAsync(userDTO.Email) != null)
                 return new BaseResponse { Message = userDTO.Email + " is already exists !" };
 
 
@@ -136,7 +108,7 @@ namespace BookStore.Services
 
             JwtSecurityToken token = await CreateJWT(user);
 
-            return new RegisterationResponse 
+            return new RegisterationResponse
             {
                 isAuthenticated = true,
                 Message = "Account Created Successfully",
@@ -166,42 +138,6 @@ namespace BookStore.Services
                 Token = new JwtSecurityTokenHandler().WriteToken(token)
             };
         }
-
-        public async Task<BaseResponse> AddToRoleAsync(AddToRoleDTO addRole)
-        {
-            ApplicationUser user = await _userManager.FindByIdAsync(addRole.userId);
-
-            IdentityRole role = await _roleManager.FindByNameAsync(addRole.roleName);
-
-            if (user != null && role != null)
-            {
-                if (await _userManager.IsInRoleAsync(user, addRole.roleName))
-                    return  new BaseResponse { Message="User already assigned to this role" };
-
-                return await AddUserToRole(user, addRole.roleName);
-            }
-            return new BaseResponse { Message = "Invalid user or Role" };
-        }
-        public async Task<BaseResponse> RemoveFromRoleAsync(AddToRoleDTO addRole)
-        {
-            ApplicationUser user = await _userManager.FindByIdAsync(addRole.userId);
-
-            IdentityRole role = await _roleManager.FindByNameAsync(addRole.roleName);
-
-            if (user != null && role != null)
-            {
-                if (!await _userManager.IsInRoleAsync(user, addRole.roleName))
-                    return new BaseResponse { Message = $"{user.UserName} is not  assigned to {addRole.roleName} role" };
-
-                var result = await _userManager.RemoveFromRoleAsync(user, addRole.roleName);
-                if (result.Succeeded)
-                {
-                    return new BaseResponse { Message = $"{user.UserName} removed from {addRole.roleName} role Successfully !", isAuthenticated=true };
-                }
-            }
-            return new BaseResponse { Message = "Invalid user or Role" };
-        }
-
-
+        
     }
 }
