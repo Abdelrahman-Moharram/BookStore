@@ -26,6 +26,7 @@ builder.Services.AddSwaggerGen();
 // ------------------------- Scopes Conf ----------------------//
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWT"));
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 // ------------------------------------------------------- //
@@ -104,6 +105,7 @@ var app = builder.Build();
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 var authService = services.GetRequiredService<IAuthService>();
+var roleService = services.GetRequiredService<IRoleService>();
 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 var loggerAccounts = services.GetRequiredService<ILogger<AccountsController>>();
 
@@ -112,10 +114,10 @@ try
 {
     if (roleManager.Roles.Any())
     {
-        await DefaultRoles.SeedAsync(authService);
-        await DefaultUsers.SeedAdminAsync(authService, roleManager);
-        await DefaultUsers.SeedBasicAsync(authService, roleManager);
-        await DefaultUsers.SeedSuperAdminAsync(authService, roleManager);
+        await DefaultRoles.SeedAsync(roleService);
+        await DefaultUsers.SeedAdminAsync(authService, roleService, roleManager);
+        await DefaultUsers.SeedBasicAsync(authService, roleService, roleManager);
+        await DefaultUsers.SeedSuperAdminAsync(authService, roleService, roleManager);
     }
 }
 catch(Exception ex)

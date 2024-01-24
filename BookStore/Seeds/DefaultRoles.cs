@@ -6,11 +6,11 @@ namespace BookStore.Seeds
 {
     public static class DefaultRoles
     {
-        public static async Task SeedAsync(IAuthService authService)
+        public static async Task SeedAsync(IRoleService roleService)
         {
-            await authService.AddRole(Roles.SuperAdmin.ToString());
-            await authService.AddRole(Roles.Admin.ToString());
-            await authService.AddRole(Roles.Basic.ToString());
+            await roleService.AddRole(Roles.SuperAdmin.ToString());
+            await roleService.AddRole(Roles.Admin.ToString());
+            await roleService.AddRole(Roles.Basic.ToString());
         }
     }
 }

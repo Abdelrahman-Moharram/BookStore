@@ -12,7 +12,7 @@ namespace BookStore.Seeds
         
 
 
-        public static async Task SeedBasicAsync(IAuthService authService, RoleManager<IdentityRole> roleManager)
+        public static async Task SeedBasicAsync(IAuthService authService, IRoleService roleService, RoleManager<IdentityRole> roleManager)
         {
             var user = await authService.AddUser(new RegisterDTO
             {
@@ -24,7 +24,7 @@ namespace BookStore.Seeds
 
             if (user != null)
             {
-                await authService.AddUserToRole(user, Roles.Basic.ToString());
+                await roleService.AddUserToRole(user, Roles.Basic.ToString());
             }
             foreach (string module in Enum.GetNames(typeof(Modules)))
             {
@@ -36,7 +36,7 @@ namespace BookStore.Seeds
         }
 
 
-        public static async Task SeedAdminAsync(IAuthService authService, RoleManager<IdentityRole> roleManager)
+        public static async Task SeedAdminAsync(IAuthService authService, IRoleService roleService, RoleManager<IdentityRole> roleManager)
         {
             var user = await authService.AddUser(new RegisterDTO
             {
@@ -51,7 +51,7 @@ namespace BookStore.Seeds
                 foreach (string role in Enum.GetNames(typeof(Roles)))
                 {
                     if (role != Roles.SuperAdmin.ToString())
-                        await authService.AddUserToRole(user, role);
+                        await roleService.AddUserToRole(user, role);
                 }
             }
 
@@ -65,7 +65,7 @@ namespace BookStore.Seeds
             }
         }
 
-        public static async Task SeedSuperAdminAsync(IAuthService authService, RoleManager<IdentityRole> roleManager)
+        public static async Task SeedSuperAdminAsync(IAuthService authService, IRoleService roleService, RoleManager<IdentityRole> roleManager)
         {
             var user = await authService.AddUser(new RegisterDTO
             {
@@ -79,7 +79,7 @@ namespace BookStore.Seeds
             {
                 foreach (string role in Enum.GetNames(typeof(Roles)))
                 {
-                    await authService.AddUserToRole(user, role);
+                    await roleService.AddUserToRole(user, role);
                 }
             }
             // Seed Claims

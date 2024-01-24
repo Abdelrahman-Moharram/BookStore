@@ -125,7 +125,7 @@ namespace BookStore.Controllers
 
         // all system permissions
         [Authorize(Roles = "SuperAdmin")]
-        [HttpGet("/Permissions")]
+        [HttpGet("/api/Permissions")]
         public Task<IActionResult> PermissionsList()
         {
             return Task.FromResult<IActionResult>(Ok(Task.Run(()=> Permissions.AllPermissionsList())));
