@@ -31,6 +31,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
+// Permissions
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
@@ -97,33 +98,33 @@ builder.Services.AddAuthentication(
 
 // ------------------------- logger Conf ----------------------//
 
-var logger =
-    new LoggerConfiguration()
-    .ReadFrom
-    .Configuration(builder.Configuration)
-    .CreateLogger();
+var logger =new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
 
 builder.Logging.AddSerilog(logger);
 
-
-
+// ------------------------------------------------------- //
 
 
 var app = builder.Build();
 
+
+
 // ---------------------------  Data Seeding    ---------------------------- //
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
-var authService = services.GetRequiredService<IAuthService>();
-var roleService = services.GetRequiredService<IRoleService>();
-var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 var loggerAccounts = services.GetRequiredService<ILogger<AccountsController>>();
+
+var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
 
 try
 {
     if (roleManager.Roles.Any())
     {
+        var authService = services.GetRequiredService<IAuthService>();
+        var roleService = services.GetRequiredService<IRoleService>();
+
+
         await DefaultRoles.SeedAsync(roleService);
         await DefaultUsers.SeedAdminAsync(authService, roleService, roleManager);
         await DefaultUsers.SeedBasicAsync(authService, roleService, roleManager);

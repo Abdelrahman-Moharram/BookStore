@@ -123,7 +123,6 @@ namespace BookStore.Services
             var role = _roleManager.FindByIdAsync(permissionsDTO.RoleId).Result;
             if (role == null)
                 return null;
-            var per = permissionsDTO.Permissions;
             foreach (var claim in _roleManager.GetClaimsAsync(role).Result)
             {
                 if (permissionsDTO.Permissions.FirstOrDefault(p => p.ToLower() == claim.Value.ToLower()) == null)
@@ -131,7 +130,6 @@ namespace BookStore.Services
                 else
                     permissionsDTO.Permissions.Remove(claim.Value);
             }
-            per = permissionsDTO.Permissions;
             foreach (var permission in permissionsDTO.Permissions)
                 await _roleManager.AddClaimAsync(role, new Claim("Permission", permission));
 

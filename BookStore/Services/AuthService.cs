@@ -9,8 +9,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security;
 using System.Security.Claims;
 using System.Text;
 
@@ -48,12 +50,13 @@ namespace BookStore.Services
             {
                 roleClaims.Add(new Claim("roles", role));
                 foreach (var claim in _roleService.GetRoleClaimsPermissions(role).Result)
-                    roleClaims.Add(new Claim("Permission", claim));
+                    if(roleClaims.FirstOrDefault(i=>i.Value == claim) == null)
+                        roleClaims.Add(new Claim("Permission", claim));
             }
 
 
 
-           var Claims = new List<Claim>
+            var Claims = new List<Claim>
                 {
                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),

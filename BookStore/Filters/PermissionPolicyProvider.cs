@@ -5,20 +5,20 @@ namespace BookStore.Filters
 {
     public class PermissionPolicyProvider : IAuthorizationPolicyProvider
     {
-        public DefaultAuthorizationPolicyProvider FullBackPolicyProvider { get; }
+        public DefaultAuthorizationPolicyProvider FallBackPolicyProvider { get; }
 
         public PermissionPolicyProvider(IOptions<AuthorizationOptions> options)
         {
-            FullBackPolicyProvider = new DefaultAuthorizationPolicyProvider(options);
+            FallBackPolicyProvider = new DefaultAuthorizationPolicyProvider(options);
         }
         public Task<AuthorizationPolicy> GetDefaultPolicyAsync()
         {
-            return FullBackPolicyProvider.GetDefaultPolicyAsync();
+            return FallBackPolicyProvider.GetDefaultPolicyAsync();
         }
 
         public Task<AuthorizationPolicy?> GetFallbackPolicyAsync()
         {
-            return FullBackPolicyProvider.GetDefaultPolicyAsync();
+            return FallBackPolicyProvider.GetDefaultPolicyAsync();
         }
 
         public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
@@ -29,7 +29,7 @@ namespace BookStore.Filters
                 policy.AddRequirements(new PermissionRequirement(policyName));
                 return Task.FromResult(policy.Build());
             }
-            return FullBackPolicyProvider.GetPolicyAsync(policyName);
+            return FallBackPolicyProvider.GetPolicyAsync(policyName);
         }
     }
 }
