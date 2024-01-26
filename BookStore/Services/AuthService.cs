@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -18,14 +19,18 @@ namespace BookStore.Services
     public class AuthService : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IRoleService _roleService;
         private readonly JWTSettings _jwt;
+        
 
         public AuthService(
             UserManager<ApplicationUser> userManager, 
-            IOptions<JWTSettings> jwt
+            IOptions<JWTSettings> jwt,
+            IRoleService roleService
             )
         {
             _userManager = userManager;
+            _roleService = roleService;
             _jwt = jwt.Value;
 
 
@@ -40,11 +45,15 @@ namespace BookStore.Services
             var roleClaims = new List<Claim>();
 
             foreach (var role in roles)
+            {
                 roleClaims.Add(new Claim("roles", role));
+                foreach (var claim in _roleService.GetRoleClaimsPermissions(role).Result)
+                    roleClaims.Add(new Claim("Permission", claim));
+            }
 
 
 
-            var Claims = new List<Claim>
+           var Claims = new List<Claim>
                 {
                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
@@ -54,6 +63,8 @@ namespace BookStore.Services
                 }
             .Union(userClaims)
             .Union(roleClaims);
+            
+
 
             SigningCredentials credentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.SECRETKEY)),

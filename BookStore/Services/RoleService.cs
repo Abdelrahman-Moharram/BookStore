@@ -105,13 +105,19 @@ namespace BookStore.Services
             return new BaseResponse { Message = "Invalid user or Role" };
         }
 
-        public async Task<List<string>> GetRoleClaimsPermissions(string roleId)
+        public async Task<List<string>> GetRoleClaimsPermissions(string roleNameOrRoleId)
         {
-            var role = _roleManager.FindByIdAsync(roleId).Result;
+            var role = _roleManager.FindByIdAsync(roleNameOrRoleId).Result;
+            if (role == null)
+                role = _roleManager.FindByNameAsync(roleNameOrRoleId).Result;
+            
             if (role == null)
                 return null;
+
             return _roleManager.GetClaimsAsync(role).Result.Where(i => i.Type == "Permission").Select(i => i.Value).ToList();
         }
+
+        
         public async Task<List<string>> EditRoleClaimsPermissions(RolePermissionsDTO permissionsDTO)
         {
             var role = _roleManager.FindByIdAsync(permissionsDTO.RoleId).Result;

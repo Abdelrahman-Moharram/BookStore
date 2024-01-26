@@ -1,11 +1,13 @@
 using BookStore.Controllers;
 using BookStore.Data;
+using BookStore.Filters;
 using BookStore.Helpers;
 using BookStore.Models;
 using BookStore.Repository;
 using BookStore.Seeds;
 using BookStore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -29,6 +31,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
 // ------------------------------------------------------- //
 
 
@@ -41,6 +46,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
         ));
+
 
 // ------------------------------------------------------- //
 
@@ -56,6 +62,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
         options.Password.RequiredLength = 8;
     }
     ).AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.Zero;
+});
 
 // ------------------------------------------------------- //
 
