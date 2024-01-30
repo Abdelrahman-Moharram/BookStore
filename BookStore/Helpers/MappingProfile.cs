@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BookStore.DTOs.Author;
 using BookStore.DTOs.Book;
 using BookStore.Models;
 using Elfie.Serialization;
@@ -20,7 +21,8 @@ namespace BookStore.Helpers
                 .ForPath(dest => dest.CategoryName, opt => opt.MapFrom(src => (src.Category)))
                 .ReverseMap();
 
-            
+            CreateMap<Author, AuthorDTO>().ReverseMap();
+            CreateMap<Category, CategoryDTO>().ReverseMap();
 
         }
 

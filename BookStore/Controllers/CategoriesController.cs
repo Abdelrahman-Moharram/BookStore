@@ -27,9 +27,9 @@ namespace BookStore.Controllers
         { 
             if(ModelState.IsValid)
             {
-                _categoryRepository.AddAsync(category);
+                var  cat = await _categoryRepository.AddAsync(category);
                 _categoryRepository.Save();
-                return Ok(category);
+                return Ok(cat);
             }
             _logger.LogWarning("The category data entered is invalid.");
             return BadRequest(category);
