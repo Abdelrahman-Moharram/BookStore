@@ -26,9 +26,9 @@ namespace BookStore.Controllers
 
         [HttpGet]
         [Authorize(Policy = "permissions.Read.Book")]
-        public async Task<IActionResult> All()
+        public async Task<IActionResult> Paginate([FromQuery] int start = 0, [FromQuery] int end = 10)
         {
-            return  Ok(_mapper.Map<IEnumerable<Book>, IEnumerable<BookDTO>>(await _bookRepository.GetAllAsync()));
+            return  Ok(_mapper.Map<IEnumerable<Book>, IEnumerable<BookDTO>>(await _bookRepository.PaginateAsync(start, end)));
         }
 
         [HttpPost("add")]
@@ -48,17 +48,17 @@ namespace BookStore.Controllers
 
         [HttpGet("search")]
         [Authorize(Policy = "permissions.Read.Book")]
-        public async Task<IActionResult> Search([FromBody] SearchBookDTO searchDTO)
+        public async Task<IActionResult> Search([FromQuery] SearchBookDTO searchDTO)
         {
             if (ModelState.IsValid)
             {
                 var result = await _bookRepository.FindAllAsync(
                     i =>
-                        i.Name == searchDTO.BookName ||
+                        i.Name.Contains(searchDTO.BookName) ||
                         i.PublishDate == searchDTO.PublishDate ||
-                        i.Publisher.UserName == searchDTO.PublisherName ||
-                        i.Author.FullName == searchDTO.AuthorName ||
-                        i.Category.Name == searchDTO.CategoryName
+                        i.Publisher.UserName.Contains(searchDTO.PublisherName) ||
+                        i.Author.FullName.Contains(searchDTO.AuthorName) ||
+                        i.Category.Name.Contains(searchDTO.CategoryName)
                     );
                 return Ok(result);
             }
@@ -74,27 +74,32 @@ namespace BookStore.Controllers
             if(bookId == bookDTO.Id && ModelState.IsValid)
             {
                 var book = _mapper.Map<UpdateBookDTO, Book>(bookDTO);
-                await _bookRepository.UpdateAsync(book);
-                _bookRepository.Save();
-                return Ok(book);
+                book = await _bookRepository.UpdateAsync(book, bookId);
+                if (book != null)
+                {
+                    await _bookRepository.SaveAsync();
+                    return Ok(book);
+                }
+                return NotFound("Can't Found Book with this Id");
             }
             return BadRequest(bookDTO);
         }
 
-        [HttpPost("Delete/{bookId}")]
+        [HttpDelete("Delete/{bookId}")]
         [Authorize(Policy = "permissions.Delete.Book")]
         [BookPublisherOrAdmin]
         public async Task<IActionResult> Delete([FromRoute]  string bookId)
         {
-            if (bookId != null && ModelState.IsValid)
+            if (bookId != null)
             {
                 var book = await _bookRepository.GetByIdAsync(bookId);
                 if(book  != null)
                 {
-                book = await _bookRepository.DeleteAsync(book);
-                _bookRepository.Save();
-                return Ok(book);
+                    book = await _bookRepository.DeleteAsync(book);
+                    await _bookRepository.SaveAsync();
+                    return Ok(book);
                 }
+                return NotFound();
             }
             return BadRequest(bookId);
         }

@@ -66,8 +66,10 @@ namespace BookStore.Repository
             await Task.Run(()=> context.SaveChangesAsync());
         }
 
-        public async Task<T> UpdateAsync(T t)
+        public async Task<T> UpdateAsync(T t, string Id)
         {
+            if (context.Set<T>().Find(Id) == null)
+                return null;
             await Task.Run(()=> context.Set<T>().Update(t));
             return t;
         }

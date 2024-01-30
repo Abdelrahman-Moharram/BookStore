@@ -13,7 +13,7 @@ namespace BookStore.Repository
         Task<T> AddAsync(T t);
         Task<T> DeleteAsync(T t);
         void Save();
-        Task<T> UpdateAsync(T t);
+        Task<T> UpdateAsync(T t, string Id);
         Task SaveAsync();
     }
 }
