@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using BookStore.DTOs.Book;
+using System.Linq.Expressions;
 
 namespace BookStore.Repository
 {
@@ -9,9 +10,10 @@ namespace BookStore.Repository
         Task<List<T>> FindAllAsync(Expression<Func<T, bool>> expression);
         Task<T> FindAsync(Expression<Func<T, bool>> expression);
         Task<List<T>> PaginateAsync(int start, int end);
-        void AddAsync(T t);
-        void UpdateAsync(T t);
+        Task<T> AddAsync(T t);
         Task<T> DeleteAsync(T t);
         void Save();
+        Task<T> UpdateAsync(T t);
+        Task SaveAsync();
     }
 }

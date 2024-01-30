@@ -14,7 +14,7 @@ namespace BookStore.Services
     {
 
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ILogger<AccountsController> _logger;
+        private readonly ILogger<RolesController> _logger;
         private readonly JWTSettings _jwt;
         private readonly UserManager<ApplicationUser> _userManager;
 
@@ -22,7 +22,7 @@ namespace BookStore.Services
             UserManager<ApplicationUser> userManager,
             IOptions<JWTSettings> jwt,
             RoleManager<IdentityRole> roleManager,
-            ILogger<AccountsController> logger
+            ILogger<RolesController> logger
             )
         {
             _userManager = userManager;

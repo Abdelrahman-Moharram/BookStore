@@ -1,6 +1,8 @@
 ﻿using BookStore.Data;
+using BookStore.DTOs.Book;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BookStore.Repository
 {
@@ -16,7 +18,6 @@ namespace BookStore.Repository
 
         public async Task<List<T>> GetAllAsync()
         {
-
             return await context.Set<T>().ToListAsync();
         }
 
@@ -44,14 +45,12 @@ namespace BookStore.Repository
         {
             return await Task.FromResult(context.Set<T>().Where(expression).ToList());
         }
-        public async void AddAsync(T t)
+        public async Task<T> AddAsync(T t)
         {
             await context.Set<T>().AddAsync(t);
+            return t;
         }
-        public void UpdateAsync(T t)
-        {
-            Task.FromResult(context.Set<T>().Update(t));
-        }
+        
         public async Task<T> DeleteAsync(T t)
         {
             await Task.Run(() => context.Remove(t));
@@ -62,11 +61,17 @@ namespace BookStore.Repository
         {
             context.SaveChanges();
         }
-        public async void SaveAsync()
+        public async Task SaveAsync()
         {
-            await context.SaveChangesAsync();
+            await Task.Run(()=> context.SaveChangesAsync());
         }
 
+        public async Task<T> UpdateAsync(T t)
+        {
+            await Task.Run(()=> context.Set<T>().Update(t));
+            return t;
+        }
 
+        
     }
 }

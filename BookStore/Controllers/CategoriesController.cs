@@ -12,10 +12,12 @@ namespace BookStore.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly IBaseRepository<Category> _categoryRepository;
+        private readonly ILogger<CategoriesController> _logger;
 
-        public CategoriesController(IBaseRepository<Category> categoryRepository)
+        public CategoriesController(IBaseRepository<Category> categoryRepository, ILogger<CategoriesController> logger)
         {
             _categoryRepository = categoryRepository;
+            _logger = logger;
         }
 
 
@@ -29,6 +31,7 @@ namespace BookStore.Controllers
                 _categoryRepository.Save();
                 return Ok(category);
             }
+            _logger.LogWarning("The category data entered is invalid.");
             return BadRequest(category);
         }
 

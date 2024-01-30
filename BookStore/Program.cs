@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
@@ -48,9 +49,10 @@ builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler
 
 builder.Services.AddDbContext<ApplicationDbContext>(
     options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-        ));
+        {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        });
 
 
 // ------------------------------------------------------- //
@@ -100,11 +102,15 @@ builder.Services.AddAuthentication(
 
 // ------------------------------------------------------- //
 
-// ------------------------- logger Conf ----------------------//
+// ------------------------- Other Confs ----------------------//
 
+// Logger
 var logger =new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
 
 builder.Logging.AddSerilog(logger);
+
+// auto mapper
+builder.Services.AddAutoMapper(typeof(Program));
 
 // ------------------------------------------------------- //
 
