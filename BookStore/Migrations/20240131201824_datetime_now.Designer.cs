@@ -4,6 +4,7 @@ using BookStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240131201824_datetime_now")]
+    partial class datetime_now
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,16 +127,16 @@ namespace BookStore.Migrations
                     b.Property<DateTime>("PublishDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 1, 31, 23, 44, 10, 802, DateTimeKind.Local).AddTicks(887));
+                        .HasDefaultValue(new DateTime(2024, 1, 31, 22, 18, 23, 762, DateTimeKind.Local).AddTicks(2064));
 
                     b.Property<string>("PublisherId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("RatersCount")
+                    b.Property<int?>("RatersCount")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("RatersTotal")
+                    b.Property<decimal?>("RatersTotal")
                         .HasColumnType("decimal(18, 6)");
 
                     b.HasKey("Id");
@@ -163,7 +166,7 @@ namespace BookStore.Migrations
                     b.Property<DateTime>("ReadAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 1, 31, 23, 44, 10, 802, DateTimeKind.Local).AddTicks(6450));
+                        .HasDefaultValue(new DateTime(2024, 1, 31, 22, 18, 23, 762, DateTimeKind.Local).AddTicks(7646));
 
                     b.HasKey("BookId", "userId");
 

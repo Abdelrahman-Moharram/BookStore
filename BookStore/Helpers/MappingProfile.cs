@@ -15,6 +15,7 @@ namespace BookStore.Helpers
 
 
             CreateMap<Book, BookDTO>()
+                .ForMember(dest=>dest.BookId, src=>src.MapFrom(src=>src.Id))
                 .ForMember(dest=>dest.BookName, src=>src.MapFrom(src=>src.Name))
                 .ForPath(dest=>dest.AuthorName, opt => opt.MapFrom(src => src.Author.FullName))
                 .ForPath(dest => dest.PublisherName, opt => opt.MapFrom(src => src.Publisher.UserName))

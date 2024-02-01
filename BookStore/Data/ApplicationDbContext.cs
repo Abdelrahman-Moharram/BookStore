@@ -38,6 +38,13 @@ namespace BookStore.Data
                 .WithMany(ii=>ii.PublishedBooks)
                 .HasForeignKey(iii=>iii.PublisherId);
 
+            builder.Entity<Book>()
+                .Property(i => i.RatersTotal)
+                .HasColumnType("decimal(18, 6)");
+
+            
+
+
             builder
                 .Entity<Book>()
                 .HasOne(i => i.Author)
@@ -91,7 +98,11 @@ namespace BookStore.Data
                         .Property(bri => bri.Rate)
                         .HasDefaultValue(0.0)
                         .HasColumnType("decimal(18, 6)");
-                        
+
+                        br
+                        .Property(bri => bri.ReadAt)
+                        .HasDefaultValue(DateTime.Now);
+
                         br
                         .HasKey(bri => new { bri.BookId, bri.userId});
                     }

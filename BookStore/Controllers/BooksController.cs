@@ -16,11 +16,13 @@ namespace BookStore.Controllers
     {
         private readonly IBaseRepository<Book> _bookRepository;
         private readonly IMapper _mapper;
+        private readonly IBaseRepository<BookReader> _readBookRepository;
 
-        public BooksController(IBaseRepository<Book> bookRepository, IMapper mapper)
+        public BooksController(IBaseRepository<Book> bookRepository, IMapper mapper, IBaseRepository<BookReader> readBookRepository)
         {
             _bookRepository = bookRepository;
             _mapper = mapper;
+            _readBookRepository = readBookRepository;
         }
 
 
@@ -30,6 +32,61 @@ namespace BookStore.Controllers
         {
             return  Ok(_mapper.Map<IEnumerable<Book>, IEnumerable<BookDTO>>(await _bookRepository.PaginateAsync(start, end)));
         }
+
+
+        [HttpGet("{bookId}")]
+        [Authorize(Policy = "permissions.Read.Book")]
+        public async Task<IActionResult> ReadBook([FromRoute] string bookId)
+        {
+            var userId = User.Claims.FirstOrDefault(i => i.Type == "userId")?.Value;
+            if (!string.IsNullOrWhiteSpace(bookId) && userId != null)
+            {
+                var book = _bookRepository.GetByIdAsync(bookId).Result;
+                if (book == null) return NotFound();
+
+                if(_readBookRepository.FindAsync(i=>i.userId == userId && i.BookId==bookId).Result == null)
+                {
+                    await _readBookRepository.AddAsync(new BookReader
+                    {
+                        BookId = bookId,
+                        userId = userId,
+                    });
+                    await _readBookRepository.SaveAsync();
+                }
+
+                return Ok(_mapper.Map<BookDTO>(book));
+            }
+            return BadRequest();
+        }
+
+        [HttpPost("{bookId}/rate")]
+        [Authorize(Policy = "permissions.Read.Book")]
+        public async Task<IActionResult> RateBook([FromRoute] string bookId, [FromBody] RateBookDTO rateDTO)
+        {
+            var userId = User.Claims.FirstOrDefault(i => i.Type == "userId")?.Value;
+            if (!string.IsNullOrWhiteSpace(bookId) && bookId == rateDTO.bookId && userId != null)
+            {
+                var book = _bookRepository.GetByIdAsync(bookId).Result;
+                if (book == null) return NotFound();
+
+                var readBook = _readBookRepository.FindAsync(i => i.userId == userId && i.BookId == bookId).Result;
+                if (readBook == null)
+                {
+                    readBook = await _readBookRepository.AddAsync(new BookReader
+                    {
+                        BookId = bookId,
+                        userId = userId,
+                    });
+                }
+                readBook.RateBook(rateDTO.rate);
+                readBook.UpdateBookRate(_readBookRepository.GetAllAsync().Result.Select(i => i.Rate).ToArray());
+                await _readBookRepository.SaveAsync();
+
+                return Ok();
+            }
+            return BadRequest();
+        }
+
 
         [HttpPost("add")]
         [Authorize(Policy = "permissions.Create.Book")]

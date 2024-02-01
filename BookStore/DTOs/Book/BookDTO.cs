@@ -5,6 +5,7 @@ namespace BookStore.DTOs.Book
     public class BookDTO
     {
 
+        public string? BookId { get; set; }
         public string? BookName { get; set; }
         public string? File { get; set; }
         public DateTime? PublishDate { get; set; }

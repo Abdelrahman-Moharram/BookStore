@@ -21,5 +21,8 @@
 
         public virtual List<ApplicationUser>? Readers { get; set; }
         public virtual List<BookReader>? BookReaders { get; set; }
+
+        public int RatersCount { get; set; }
+        public decimal RatersTotal { get; set;}
     }
 }
