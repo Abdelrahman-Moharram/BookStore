@@ -11,6 +11,7 @@ namespace BookStore.Repository
         Task<T> FindAsync(Expression<Func<T, bool>> expression);
         Task<List<T>> PaginateAsync(int start, int end);
         Task<T> AddAsync(T t);
+        Task<List<T>> AddRangeAsync(List<T> t);
         Task<T> DeleteAsync(T t);
         void Save();
         Task<T> UpdateAsync(T t, string Id);

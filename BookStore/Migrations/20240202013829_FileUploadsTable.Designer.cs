@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240131214411_test")]
-    partial class test
+    [Migration("20240202013829_FileUploadsTable")]
+    partial class FileUploadsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -117,7 +117,7 @@ namespace BookStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("File")
+                    b.Property<string>("FileId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -127,7 +127,7 @@ namespace BookStore.Migrations
                     b.Property<DateTime>("PublishDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 1, 31, 23, 44, 10, 802, DateTimeKind.Local).AddTicks(887));
+                        .HasDefaultValue(new DateTime(2024, 2, 2, 3, 38, 29, 496, DateTimeKind.Local).AddTicks(8564));
 
                     b.Property<string>("PublisherId")
                         .IsRequired()
@@ -166,7 +166,7 @@ namespace BookStore.Migrations
                     b.Property<DateTime>("ReadAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 1, 31, 23, 44, 10, 802, DateTimeKind.Local).AddTicks(6450));
+                        .HasDefaultValue(new DateTime(2024, 2, 2, 3, 38, 29, 497, DateTimeKind.Local).AddTicks(4461));
 
                     b.HasKey("BookId", "userId");
 
@@ -187,6 +187,32 @@ namespace BookStore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories", "bk");
+                });
+
+            modelBuilder.Entity("BookStore.Models.UploadedFile", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ContentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StoredFileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("bookId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("bookId")
+                        .IsUnique();
+
+                    b.ToTable("UploadedFiles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -368,6 +394,17 @@ namespace BookStore.Migrations
                     b.Navigation("user");
                 });
 
+            modelBuilder.Entity("BookStore.Models.UploadedFile", b =>
+                {
+                    b.HasOne("BookStore.Models.Book", "Book")
+                        .WithOne("File")
+                        .HasForeignKey("BookStore.Models.UploadedFile", "bookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -434,6 +471,8 @@ namespace BookStore.Migrations
             modelBuilder.Entity("BookStore.Models.Book", b =>
                 {
                     b.Navigation("BookReaders");
+
+                    b.Navigation("File");
                 });
 
             modelBuilder.Entity("BookStore.Models.Category", b =>

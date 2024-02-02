@@ -1,11 +1,14 @@
 ﻿using AutoMapper;
 using BookStore.DTOs.Book;
 using BookStore.Filters;
+using BookStore.Helpers;
 using BookStore.Models;
 using BookStore.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Policy;
 
 namespace BookStore.Controllers
@@ -17,12 +20,15 @@ namespace BookStore.Controllers
         private readonly IBaseRepository<Book> _bookRepository;
         private readonly IMapper _mapper;
         private readonly IBaseRepository<BookReader> _readBookRepository;
+        private readonly IBaseRepository<UploadedFile> _bookExtends;
 
-        public BooksController(IBaseRepository<Book> bookRepository, IMapper mapper, IBaseRepository<BookReader> readBookRepository)
+        public BooksController(IBaseRepository<Book> bookRepository, IMapper mapper, 
+            IBaseRepository<BookReader> readBookRepository, IBaseRepository<UploadedFile> bookExtends)
         {
             _bookRepository = bookRepository;
             _mapper = mapper;
             _readBookRepository = readBookRepository;
+            _bookExtends = bookExtends;
         }
 
 
@@ -59,6 +65,25 @@ namespace BookStore.Controllers
             return BadRequest();
         }
 
+
+        [HttpGet("{bookId}/download")]
+        public async Task<IActionResult> DownloadFile([FromRoute] string bookId)
+        {
+            var book = await _bookRepository.FindAsync(f => f.Id == bookId);
+            var uploadedFile = await _bookExtends.FindAsync(f => f.bookId == bookId);
+            if (book is null || book.File is null)
+                return NotFound();
+
+            var path = Path.Combine("wwwroot", "books", uploadedFile.FileName);
+
+            MemoryStream memoryStream = new();
+            using FileStream fileStream = new(path, FileMode.Open);
+            fileStream.CopyTo(memoryStream);
+
+            memoryStream.Position = 0;
+
+            return File(memoryStream, uploadedFile.ContentType, uploadedFile.FileName);
+        }
         [HttpPost("{bookId}/rate")]
         [Authorize(Policy = "permissions.Read.Book")]
         public async Task<IActionResult> RateBook([FromRoute] string bookId, [FromBody] RateBookDTO rateDTO)
@@ -90,14 +115,20 @@ namespace BookStore.Controllers
 
         [HttpPost("add")]
         [Authorize(Policy = "permissions.Create.Book")]
-        public async Task<IActionResult> Add([FromBody] AddBookDTO bookDTO)
+        public async Task<IActionResult> Add([FromForm] AddBookDTO bookDTO, List<IFormFile> File)
         {
             if (ModelState.IsValid)
             {
+                FileUpload fileUpload = new();
+
+
                 var book = _mapper.Map<Book>(bookDTO);
                 book.PublisherId = User.Claims.FirstOrDefault(i => i.Type == "userId")?.Value;
                 book = await _bookRepository.AddAsync(book);
-                _bookRepository.Save();
+                var uploadedFiles =  fileUpload.UploadBook(File, book.Id);
+                var result =  await _bookExtends.AddRangeAsync(uploadedFiles);
+                book.FileId = result.ToList().First().Id;  
+                await _bookRepository.SaveAsync();
                 return Ok(_mapper.Map<Book, BookDTO>(book));
             }
             return BadRequest(bookDTO);

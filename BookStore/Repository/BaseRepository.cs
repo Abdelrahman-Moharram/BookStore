@@ -1,5 +1,6 @@
 ﻿using BookStore.Data;
 using BookStore.DTOs.Book;
+using BookStore.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -50,13 +51,18 @@ namespace BookStore.Repository
             await context.Set<T>().AddAsync(t);
             return t;
         }
-        
+        public async Task<List<T>> AddRangeAsync(List<T> t)
+        {
+            await context.Set<T>().AddRangeAsync(t);
+            return t;
+        }
+
         public async Task<T> DeleteAsync(T t)
         {
             await Task.Run(() => context.Remove(t));
             return t;
         }
-
+        
         public void Save()
         {
             context.SaveChanges();

@@ -42,6 +42,10 @@ namespace BookStore.Data
                 .Property(i => i.RatersTotal)
                 .HasColumnType("decimal(18, 6)");
 
+            builder.Entity<Book>()
+                .HasOne<UploadedFile>(i=>i.File)
+                .WithOne(ii=>ii.Book)
+                .HasForeignKey<UploadedFile>(iii=>iii.bookId);
             
 
 
@@ -115,5 +119,6 @@ namespace BookStore.Data
         public DbSet<Book> Books { get; set; }
         public DbSet<BookReader> BookReaders { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<UploadedFile> UploadedFiles { get; set; }
     }
 }

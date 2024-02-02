@@ -5,9 +5,10 @@
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         public string Name { get; set; }
-        public string? File { get; set; }
         public DateTime PublishDate { get; set; }
 
+        public string? FileId { get; set; }
+        public UploadedFile? File { get; set; }
 
         public string CategoryId { get; set; }
         public virtual Category? Category { get; set; }

@@ -28,7 +28,7 @@ namespace BookStore.Controllers
             if (ModelState.IsValid)
             {
                 var author = _mapper.Map<AuthorDTO, Author>(authorDTO);
-                authorDTO = _mapper.Map<AuthorDTO>(await _authorRepository.AddAsync(author));
+                author = await _authorRepository.AddAsync(author);
                 await _authorRepository.SaveAsync();
                 return Ok(authorDTO);
             }
